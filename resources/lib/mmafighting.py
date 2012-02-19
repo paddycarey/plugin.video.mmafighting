@@ -55,7 +55,7 @@ def getVideoPages(pageNum):
         
         gridVid = {}
         gridVid['url'] = sys.argv[0] + "?videoURL=%s" % urllib.quote_plus(a['href'])
-        gridVid['title'] = a.find("div", {"class" : "media-gallery-grid-entry-title"}).string
+        gridVid['title'] = a.find("div", {"class" : "media-gallery-grid-entry-title"}).string.replace('&nbsp;', ' ')
         gridVid['thumb'] = a.find("div", {"class" : "image-window shadowbox"}).img['src']
         # add video page to list
         vidPages.append(gridVid)

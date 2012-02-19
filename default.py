@@ -9,6 +9,11 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
+try:
+    import StorageServer
+except:
+    import storageserverdummy as StorageServer
+
 from BeautifulSoup import BeautifulSoup
 
 from resources.lib.mmafighting import *
@@ -21,6 +26,7 @@ __addonname__         = __addon__.getAddonInfo('name')
 __addonid__         = __addon__.getAddonInfo('id')
 __addondir__          = xbmc.translatePath(__addon__.getAddonInfo('path'))
 
+cache = StorageServer.StorageServer(__addonid__ + '-pages', 1)
 
 if __name__ == '__main__':
 
@@ -62,7 +68,7 @@ if __name__ == '__main__':
         xbmcplugin.setContent(__addonidint__, 'episodes')
     
         # loop over all videos on page
-        for video in getVideoPages(page):
+        for video in cache.cacheFunction(getVideoPages, page):
             
             # add video to directory list
             addVideo(linkName = video['title'], url = video['url'], thumbPath = video['thumb'])

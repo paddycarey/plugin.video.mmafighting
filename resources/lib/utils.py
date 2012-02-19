@@ -8,6 +8,11 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
+try:
+    import StorageServer
+except:
+    import storageserverdummy as StorageServer
+
 from resources.lib.mmafighting import *
 
 ### get addon info
@@ -16,6 +21,7 @@ __addonid__           = __addon__.getAddonInfo('id')
 __addonidint__        = int(sys.argv[1])
 __addondir__          = xbmc.translatePath(__addon__.getAddonInfo('path'))
 
+cache = StorageServer.StorageServer(__addonid__ + '-videos', 24)
 
 def getParams():
     
@@ -123,6 +129,6 @@ def addNext(page):
     xbmcplugin.addDirectoryItem(handle = __addonidint__, url = u, listitem = li, isFolder = True)
 
 def playVideo(url):
-    video = getVideoDetails(url)
+    video = cache.cacheFunction(getVideoDetails, url)
     listitem = xbmcgui.ListItem(label=video['title'], iconImage=video['thumb'], thumbnailImage=video['thumb'], path=video['url'])
     xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)  
