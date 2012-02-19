@@ -8,6 +8,7 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
+from resources.lib.mmafighting import *
 
 ### get addon info
 __addon__             = xbmcaddon.Addon()
@@ -120,3 +121,8 @@ def addNext(page):
     
     # add listitem object to list
     xbmcplugin.addDirectoryItem(handle = __addonidint__, url = u, listitem = li, isFolder = True)
+
+def playVideo(url):
+    video = getVideoDetails(url)
+    listitem = xbmcgui.ListItem(label=video['title'], iconImage=video['thumb'], thumbnailImage=video['thumb'], path=video['url'])
+    xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)  

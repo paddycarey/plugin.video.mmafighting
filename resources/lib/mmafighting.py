@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import urllib
+import sys
+
 from BeautifulSoup import BeautifulSoup
 
 
@@ -32,7 +34,7 @@ def getVideoPages(pageNum):
     Returns:    vidPageList -- A list containg all the urls of the videos (html pages not direct links) on the page"""
     
     # initialise empty list to store video page urls
-    vidPageList = []
+    vidPages = []
     
     # construct url to scrape
     url = 'http://www.mmafighting.com/videos/%s' % str(pageNum)
@@ -41,25 +43,39 @@ def getVideoPages(pageNum):
     soup = BeautifulSoup(getHtml(url))
     
     # get link to video at top of page
-    headerVid = soup.find("div", {"class" : "media-gallery-hero"}).a['href']
+    headerVidUrl = soup.find("div", {"class" : "media-gallery-hero"}).a['href']
+    headerVid = getVideoDetails(headerVidUrl)
+    headerVid['url'] = sys.argv[0] + "?videoURL=%s" % urllib.quote_plus(headerVidUrl)
     
     # add header video page to list
-    vidPageList.append(headerVid)
+    vidPages.append(headerVid)
     
     # loop through all videos in rest of page
     for a in soup.findAll("a", {"class" : "media-gallery-grid-entry"}):
         
+        gridVid = {}
+        gridVid['url'] = sys.argv[0] + "?videoURL=%s" % urllib.quote_plus(a['href'])
+        gridVid['title'] = a.find("div", {"class" : "media-gallery-grid-entry-title"}).string
+        gridVid['thumb'] = a.find("div", {"class" : "image-window shadowbox"}).img['src']
         # add video page to list
-        vidPageList.append(a['href'])
+        vidPages.append(gridVid)
     
     # return the list of video pages
-    return vidPageList
+    return vidPages
 
 
 def getVideoDetails(url):
     videoDetails = {}
     mmafPage = BeautifulSoup(getHtml(url))
-    tempDate = mmafPage.find("span", {"class" : "publish-date"}).string
+    videoDetails['date'] = parseDate(mmafPage.find("span", {"class" : "publish-date"}).string)
+    vidioUrl = mmafPage.find("div", {"class" : "clearfix video-player"}).iframe['src']
+    vidioPage = BeautifulSoup(getHtml(vidioUrl))
+    videoDetails['title'] = vidioPage.html.head.title.string
+    videoDetails['thumb'] = vidioPage.html.video['poster']
+    videoDetails['url'] = vidioPage.html.video.source['src']
+    return videoDetails
+
+def parseDate(tempDate):
     months = {  'January': '01',
                 'February': '02',
                 'March': '03',
@@ -79,10 +95,5 @@ def getVideoDetails(url):
     except ValueError:
         tempDay = "%.2d" % int(tempDate.split(' ')[4].rstrip(','))
         tempYear = tempDate.split(' ')[5]
-    videoDetails['date'] = "%s-%s-%s" % (tempYear, tempMonth, tempDay)
-    vidioUrl = mmafPage.find("div", {"class" : "clearfix video-player"}).iframe['src']
-    vidioPage = BeautifulSoup(getHtml(vidioUrl))
-    videoDetails['title'] = vidioPage.html.head.title.string
-    videoDetails['thumb'] = vidioPage.html.video['poster']
-    videoDetails['url'] = vidioPage.html.video.source['src']
-    return videoDetails
+    retDate = "%s-%s-%s" % (tempYear, tempMonth, tempDay)
+    return retDate
