@@ -26,6 +26,7 @@ __addonname__         = __addon__.getAddonInfo('name')
 __addonid__         = __addon__.getAddonInfo('id')
 __addondir__          = xbmc.translatePath(__addon__.getAddonInfo('path'))
 
+# initialise cache object to speed up plugin operation
 cache = StorageServer.StorageServer(__addonid__ + '-pages', 1)
 
 if __name__ == '__main__':

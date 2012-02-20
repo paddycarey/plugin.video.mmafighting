@@ -21,6 +21,7 @@ __addonid__           = __addon__.getAddonInfo('id')
 __addonidint__        = int(sys.argv[1])
 __addondir__          = xbmc.translatePath(__addon__.getAddonInfo('path'))
 
+# initialise cache object to speed up plugin operation
 cache = StorageServer.StorageServer(__addonid__ + '-videos', 24)
 
 def getParams():
@@ -129,6 +130,16 @@ def addNext(page):
     xbmcplugin.addDirectoryItem(handle = __addonidint__, url = u, listitem = li, isFolder = True)
 
 def playVideo(url):
+    
+    """Retrieve video details and play video
+    
+    Arguments:  url -- A string containing the url of the videos page on mmafighting.com"""
+    
+    # get video details
     video = cache.cacheFunction(getVideoDetails, url)
+    
+    # add video details to listitem
     listitem = xbmcgui.ListItem(label=video['title'], iconImage=video['thumb'], thumbnailImage=video['thumb'], path=video['url'])
+    
+    # play listitem
     xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)  
